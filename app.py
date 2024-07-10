@@ -20,11 +20,12 @@ body_weight = st.number_input('Body Weight (kg)', min_value=0, max_value=30)
 gender_code = 0 if gender == 'Female' else 1
 user_input = np.array([[age, gender_code, body_height, body_weight]])
 
-# Normalize body_weight using the loaded MinMaxScaler
-user_input[:, 3] = minmax.transform(user_input[:, 3].reshape(-1, 1)).flatten()
+# Check if user_input needs normalization and normalize body_weight
+if minmax is not None:
+    user_input[:, 3] = minmax.transform(user_input[:, 3].reshape(-1, 1)).flatten()
 
-# Ensure user_input has the correct shape for the SVM model (5 features)
-if user_input.shape[1] != 5:
+# Check the shape of user_input before predicting
+if user_input.shape[1] != 4:
     st.warning(f'Unexpected number of features ({user_input.shape[1]}) in user input.')
 
 # Predict the status
@@ -38,5 +39,5 @@ if st.button('Predict'):
         st.write('The child is predicted to be tall.')
     elif prediction == 'normal':
         st.write('The child is predicted to be normal.')
-    else:
+    elif prediction == 'severe_stunting':
         st.write('The child is predicted to be severely stunted.')
