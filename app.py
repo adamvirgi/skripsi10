@@ -1,4 +1,6 @@
-
+import joblib
+import numpy as np
+import pandas as pd
 # Load the trained SVM model and MinMaxScaler
 model = joblib.load('svm_model.joblib')
 minmax = joblib.load('minmax_scaler.joblib')
