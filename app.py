@@ -1,43 +1,31 @@
+%%writefile app.py
+import streamlit as st
 import joblib
 import numpy as np
-import pandas as pd
-import streamlit as st
 
-# Load the trained SVM model and MinMaxScaler
-model = joblib.load('svm_model.joblib')
-minmax = joblib.load('minmax_scaler.joblib')
+# Load the model
+model = joblib.load('model.joblib') # Make sure 'model.joblib' is in the same directory
 
-# Define the application layout
-st.title('Stunting Prediction App')
+# Create a function to predict the status of a child
+def predict_status(age, weight, height, gender, other_feature): # Replace 'other_feature' with the actual feature name
+    input_data = np.asarray([age, weight, height, gender, other_feature])
+    input_data_reshaped = input_data.reshape(1, -1)
+    prediction = model.predict(input_data_reshaped)
+    return prediction[0]
+
+# Streamlit app
+st.title("Child Status Prediction")
 
 # Get user input
-age = st.number_input('Age (Month)', min_value=0, max_value=72)
-gender = st.selectbox('Gender', ['Female', 'Male'])
-body_height = st.number_input('Body Height (cm)', min_value=0, max_value=120)
-body_weight = st.number_input('Body Weight (kg)', min_value=0, max_value=30)
+age = st.number_input("Enter the child's age in months:", min_value=0)
+weight = st.number_input("Enter the child's weight in kilograms:", min_value=0.0)
+height = st.number_input("Enter the child's height in centimeters:", min_value=0.0)
+gender = st.selectbox("Enter the child's gender:", ["Female", "Male"])
+gender = 0 if gender == "Female" else 1
+other_feature = st.number_input("Enter the value for [other feature name]:") # Replace '[other feature name]'
 
-# Preprocess user input
-gender_code = 0 if gender == 'Female' else 1
-user_input = np.array([[age, gender_code, body_height, body_weight]])
+# Make prediction
+if st.button("Predict"):
+    predicted_status = predict_status(age, weight, height, gender, other_feature)
+    st.success(f"The predicted status of the child is: {predicted_status}")
 
-# Check if user_input needs normalization and normalize body_weight
-if minmax is not None:
-    user_input[:, 3] = minmax.transform(user_input[:, 3].reshape(-1, 1)).flatten()
-
-# Check the shape of user_input before predicting
-if user_input.shape[1] != 4:
-    st.warning(f'Unexpected number of features ({user_input.shape[1]}) in user input.')
-
-# Predict the status
-prediction = model.predict(user_input)[0]
-
-# Display the prediction
-if st.button('Predict'):
-    if prediction == 'stunted':
-        st.write('The child is predicted to be stunted.')
-    elif prediction == 'tall':
-        st.write('The child is predicted to be tall.')
-    elif prediction == 'normal':
-        st.write('The child is predicted to be normal.')
-    elif prediction == 'severe_stunting':
-        st.write('The child is predicted to be severely stunted.')
