@@ -2,6 +2,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
+
 # Load the trained SVM model and MinMaxScaler
 model = joblib.load('svm_model.joblib')
 minmax = joblib.load('minmax_scaler.joblib')
@@ -16,8 +17,8 @@ body_height = st.number_input('Body Height (cm)', min_value=0, max_value=120)
 body_weight = st.number_input('Body Weight (kg)', min_value=0, max_value=30)
 
 # Preprocess user input
-user_input = np.array([[age, gender, body_height, body_weight]])
-user_input[:, 1] = user_input[:, 1].replace({'Female': 0, 'Male': 1})
+gender_code = 0 if gender == 'Female' else 1
+user_input = np.array([[age, gender_code, body_height, body_weight]])
 user_input[:, 3] = minmax.transform(user_input[:, 3].reshape(-1, 1))
 
 # Predict the status
